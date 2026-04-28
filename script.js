@@ -199,9 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentIndex < 0) currentIndex = 0;
       if (currentIndex > maxIdx) currentIndex = maxIdx;
 
-      currentTranslate = currentIndex * -cardW;
-      prevTranslate = currentTranslate;
-      voiceTrack.style.transform = `translateX(${currentTranslate}px)`;
+      if (window.innerWidth <= 1024) {
+        voiceTrack.parentElement.scrollTo({
+          left: currentIndex * cardW,
+          behavior: 'smooth'
+        });
+      } else {
+        currentTranslate = currentIndex * -cardW;
+        prevTranslate = currentTranslate;
+        voiceTrack.style.transform = `translateX(${currentTranslate}px)`;
+      }
       updateDots();
     };
 
@@ -219,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Drag / Touch Events
     const touchStart = (index) => (event) => {
+      if (window.innerWidth <= 1024) return;
       isDragging = true;
       startX = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
       animationID = requestAnimationFrame(animation);
@@ -233,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const touchEnd = () => {
+      if (!isDragging) return;
       isDragging = false;
       cancelAnimationFrame(animationID);
       voiceTrack.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)'; // re-enable CSS transition
@@ -253,6 +262,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add event listeners (assuming modern browsers support Touch & Mouse matching)
     const trackContainer = voiceTrack.parentElement;
+
+    trackContainer.addEventListener('scroll', () => {
+      if (window.innerWidth <= 1024) {
+        const cardW = getCardWidth();
+        if (cardW > 0) {
+          currentIndex = Math.round(trackContainer.scrollLeft / cardW);
+          updateDots();
+        }
+      }
+    }, { passive: true });
+
     trackContainer.addEventListener('mousedown', touchStart(currentIndex));
     trackContainer.addEventListener('mousemove', touchMove);
     trackContainer.addEventListener('mouseleave', () => { if (isDragging) touchEnd(); });

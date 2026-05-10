@@ -79,42 +79,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Contact Form (mailto方式 → nenedance0612@gmail.com) ---
+  // --- Contact Form (Formspree) ---
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    const submitBtn = document.getElementById('submitBtn');
+
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Collect form data
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const type = document.getElementById('type').value;
-      const message = document.getElementById('message').value;
-      const date = document.getElementById('date').value || '未指定';
-      const location = document.getElementById('location').value || '未指定';
-      const budget = document.getElementById('budget').value || '未指定';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '送信中...';
+      }
 
-      // Build mailto
-      const subject = encodeURIComponent(`【NENE LP】お問い合わせ（${type}）`);
-      const body = encodeURIComponent(
-        `【お問い合わせ内容】\n\n` +
-        `お名前: ${name}\n` +
-        `メールアドレス: ${email}\n` +
-        `お問い合わせ種別: ${type}\n` +
-        `内容:\n${message}\n\n` +
-        `希望日程: ${date}\n` +
-        `場所: ${location}\n` +
-        `予算感: ${budget}\n`
-      );
+      const formData = new FormData(contactForm);
 
-      // Open mailto
-      window.location.href = `mailto:nenedance0612@gmail.com?subject=${subject}&body=${body}`;
+      try {
+        const response = await fetch(contactForm.action, {
+          method: contactForm.method,
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
 
-      // Show thank you after a short delay
-      setTimeout(() => {
-        contactForm.style.display = 'none';
-        thankYou.classList.add('is-visible');
-        thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 500);
+        if (response.ok) {
+          contactForm.reset();
+          contactForm.style.display = 'none';
+          thankYou.classList.add('is-visible');
+          thankYou.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          const data = await response.json();
+          if (Object.hasOwn(data, 'errors')) {
+            alert(data.errors.map(error => error.message).join(', '));
+          } else {
+            alert('送信に失敗しました。もう一度お試しください。');
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '送信する';
+          }
+        }
+      } catch (error) {
+        alert('通信エラーが発生しました。ネットワーク接続をご確認ください。');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '送信する';
+        }
+      }
     });
   }
 

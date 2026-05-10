@@ -733,7 +733,10 @@
         </div>
 
         <div class="contact-form-wrapper fade-in">
-          <form class="contact-form" id="contactForm">
+          <form class="contact-form" id="contactForm" action="https://formspree.io/f/mnjwogwy" method="POST">
+            <!-- Honeypot field for spam protection -->
+            <input type="text" name="_gotcha" style="display:none">
+            
             <div class="form-group">
               <label for="name">お名前 <span class="required">必須</span></label>
               <input type="text" id="name" name="name" required placeholder="山田 太郎">
@@ -762,8 +765,8 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="date">希望日程 <span class="optional">任意</span></label>
-                <input type="text" id="date" name="date" placeholder="例：3月中旬〜下旬">
+                <label for="schedule">希望日程 <span class="optional">任意</span></label>
+                <input type="text" id="schedule" name="schedule" placeholder="例：3月中旬〜下旬">
               </div>
               <div class="form-group">
                 <label for="location">場所 <span class="optional">任意</span></label>
@@ -783,7 +786,7 @@
             </div>
 
             <div class="form-submit">
-              <button type="submit" class="btn btn-primary">送信する</button>
+              <button type="submit" class="btn btn-primary" id="submitBtn">送信する</button>
             </div>
           </form>
 
